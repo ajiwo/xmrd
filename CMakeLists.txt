@@ -1,0 +1,10 @@
+project(xmrd)
+cmake_minimum_required(VERSION 3.5)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+find_package(LibZMQ REQUIRED)
+set(srcs jsmn/jsmn.c main.c)
+add_executable(xmrd ${srcs})
+set_target_properties(xmrd PROPERTIES COMPILE_FLAGS "-Wall -g -O0 -ansi -pedantic")
+include_directories(BEFORE "${LIBZMQ_INCLUDE_DIRS}")
+target_link_libraries(xmrd ${LIBZMQ_LIBRARIES})

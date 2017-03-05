@@ -269,9 +269,16 @@ int main () {
     free(config_str);
 
     zmq_bind(responder, config->responder_url);
+    if(config->responder_ipv6)
+        zmq_setsockopt(responder, ZMQ_IPV6, "1", 1);
+
     for (i = 0; i < config->_pub_size; i++) {
         zmq_bind(publisher, config->publisher_url[i]);
     }
+    if(config->publisher_ipv6)
+        zmq_setsockopt(publisher, ZMQ_IPV6, "1", 1);
+
+    /* TODO: config->debug */
 
     hb_time = time(NULL) + HEARTBEAT_INTERVAL;
     signal(SIGINT, handle_signal);

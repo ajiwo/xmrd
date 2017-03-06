@@ -5,7 +5,8 @@ Drop-in alternative for xibo-xmr
 ```shell
 sudo apt install libzmq3-dev
 git clone https://github.com/ajiwo/xmrd.git
-cd xmrd && mkdir build && cd build
+cd xmrd && git submodule update --init --recursive
+mkdir build && cd build
 cmake .. && make
 # create/edit /etc/xmr/config.json
 ./xmrd

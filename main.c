@@ -143,6 +143,25 @@ static void xmr_config_free (xmr_config_t **config) {
     }
 }
 
+static xmr_config_t *default_config () {
+    xmr_config_t *config = NULL;
+    const char *resp_url = "tcp://127.0.0.1:50001";
+    const char *pub_url = "tcp://*:9505";
+
+    config = malloc(sizeof(xmr_config_t));
+    config->debug = 0;
+    config->publisher_ipv6 = 0;
+    config->responder_ipv6 = 0;
+    config->publisher_url = malloc(sizeof(char *));
+    config->publisher_url[0] = malloc((strlen(pub_url) + 1) * sizeof(char));
+    strcpy(config->publisher_url[0], pub_url);
+    config->responder_url = malloc((strlen(resp_url) + 1) * sizeof(char));
+    strcpy(config->responder_url, resp_url);
+    config->_pub_size = 1;
+
+    return config;
+}
+
 static xmr_config_t *read_config (const char *src) {
     int i;
     int j;
@@ -153,11 +172,8 @@ static xmr_config_t *read_config (const char *src) {
     int len;
     xmr_config_t *config = NULL;
 
-    jsmn_init(&parser);
-    num_token = jsmn_parse(&parser, src, strlen(src), tokens, JSMN_MAX_TOKEN);
-    if (num_token < 0) return NULL;
-    if (num_token < 1 || tokens[0].type != JSMN_OBJECT) return NULL;
-    if (num_token > JSMN_MAX_TOKEN) return NULL;
+
+    if (src == NULL) return default_config();
 
     config = malloc(sizeof(xmr_config_t));
     config->debug = 0;
@@ -166,6 +182,12 @@ static xmr_config_t *read_config (const char *src) {
     config->publisher_url = NULL;
     config->responder_url = NULL;
     config->_pub_size = 0;
+
+    jsmn_init(&parser);
+    num_token = jsmn_parse(&parser, src, strlen(src), tokens, JSMN_MAX_TOKEN);
+    if (num_token < 0) return NULL;
+    if (num_token < 1 || tokens[0].type != JSMN_OBJECT) return NULL;
+    if (num_token > JSMN_MAX_TOKEN) return NULL;
 
     for (i = 1; i < num_token; i++) {
         len = tokens[i + 1].end - tokens[i + 1].start;

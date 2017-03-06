@@ -27,11 +27,11 @@ static void handle_signal (int signum) {
     sig_status = signum;
 }
 
-static size_t file_get_size(FILE *file) {
+static size_t file_get_size (FILE *file) {
     size_t pos, len;
 
     len = -1;
-    if(file && (pos = ftell(file)) != -1) {
+    if (file && (pos = ftell(file)) != -1) {
         len = !fseek(file, 0, SEEK_END) ? ftell(file) : -1;
         fseek(file, pos, SEEK_SET);
     }
@@ -39,7 +39,7 @@ static size_t file_get_size(FILE *file) {
     return len;
 }
 
-static char *file_get_string(const char *path) {
+static char *file_get_string (const char *path) {
     FILE *file;
     size_t i;
     size_t len;
@@ -49,14 +49,14 @@ static char *file_get_string(const char *path) {
     i = 0;
     data = NULL;
     file = fopen(path, "r");
-    if(file) {
+    if (file) {
         len = file_get_size(file);
 
-        if(len > 0)
+        if (len > 0)
             data = malloc((len + 1) * sizeof(char));
 
-        if(data) {
-            for(;i < len && (c = fgetc(file)) != EOF; data[i++] = c);
+        if (data) {
+            for (;i < len && (c = fgetc(file)) != EOF; data[i++] = c);
             data[len] = 0;
         }
 
@@ -119,6 +119,7 @@ static int send_multipart (void *socket, const char **src) {
 
     return sent;
 }
+
 static void xmr_config_free (xmr_config_t **config) {
     int i;
     int c;
@@ -128,12 +129,15 @@ static void xmr_config_free (xmr_config_t **config) {
 
         free((*config)->responder_url);
         (*config)->responder_url = NULL;
-        for(i = 0; i < c; i++) {
+
+        for (i = 0; i < c; i++) {
             free((*config)->publisher_url[i]);
             (*config)->publisher_url[i] = NULL;
         }
+
         free((*config)->publisher_url);
         (*config)->publisher_url = NULL;
+
         free(*config);
         *config = NULL;
     }
@@ -202,6 +206,7 @@ static xmr_config_t *read_config (const char *src) {
             i++;
         }
     }
+
     return config;
 }
 
@@ -268,15 +273,13 @@ int main () {
     config = read_config(config_str);
     free(config_str);
 
+    zmq_setsockopt(responder, ZMQ_IPV6, &(config->responder_ipv6), sizeof(int));
     zmq_bind(responder, config->responder_url);
-    if(config->responder_ipv6)
-        zmq_setsockopt(responder, ZMQ_IPV6, "1", 1);
 
+    zmq_setsockopt(publisher, ZMQ_IPV6, &(config->publisher_ipv6), sizeof(int));
     for (i = 0; i < config->_pub_size; i++) {
         zmq_bind(publisher, config->publisher_url[i]);
     }
-    if(config->publisher_ipv6)
-        zmq_setsockopt(publisher, ZMQ_IPV6, "1", 1);
 
     /* TODO: config->debug */
 
